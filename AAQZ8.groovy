@@ -5,12 +5,18 @@ class numC extends ExprC {
     numC(int num) {
         this.num = num;
     }
+    String toString() {
+        return num.toString();
+    }
 }
 
 class idC extends ExprC {
     String id;
     idC(String id) {
         this.id = id;
+    }
+    String toString() {
+        return id;
     }
 }
 
@@ -47,6 +53,9 @@ class appC extends ExprC {
     appC(ExprC fun, ExprC[] args) {
         this.fun = fun;
         this.args = args;
+    }
+    String toString() {
+        return "appC" + " (" + fun.toString() + ")" + " (" + args.toString() + ")";
     }
 }
 
@@ -300,6 +309,56 @@ def interp (ast, env) {
     }
 }
 
+def parser(Sexp) {
+    if (!(Sexp instanceof List)) {
+        if (Sexp instanceof Integer) {
+            return new numC(Sexp);
+        } else if (Sexp instanceof String) {
+            if (Sexp.startsWith("\"") && Sexp.endsWith("\"")) {
+                return new strC(Sexp.substring(1, Sexp.length() - 1));
+            } else {
+                return new idC(Sexp);
+            }
+        } else {
+            throw new Exception("Unknown element: " + Sexp);
+        }
+    }
+
+    if (Sexp.size() == 0) {
+        throw new Exception("Empty array");
+    }
+
+    if (Sexp.size() == 1) {
+        def args = new ExprC[0];
+        return new appC(parser(Sexp[0]), args); // Single-element list, delegate to parser
+    }
+
+    if ((Sexp.size() == 4) && (Sexp[0] == "if")) {
+        return new ifC(parser(Sexp[1]), parser(Sexp[2]), parser(Sexp[3]));
+    }
+
+    if ((Sexp.size() == 3) && (Sexp[1] == "=>")) {
+        if (!(Sexp[0] instanceof List)) {
+            throw new Exception("Lambda arguments should be a list: " + Sexp[0]);
+        }
+        return new lamC(Sexp[0], parser(Sexp[2]));
+    }
+
+    if (Sexp.size() >= 2) {
+        def args = new ExprC[Sexp.size() - 1];
+        for (int i = 1; i < Sexp.size(); i++) {
+            args[i - 1] = parser(Sexp[i]);
+        }
+        return new appC(parser(Sexp[0]), args);
+    }
+
+    throw new Exception("Invalid array format: " + arr);
+}
+
+def topInterp(Sexp) {
+    parse = parser(Sexp)
+    return interp(parse, topEnv)
+}
 // Test Cases
 def checkEqual(testno, act, exp){
     def passed = "Test "+ testno + " : Passed"
@@ -388,6 +447,19 @@ checkEqual(17, interp(ast17, topEnv), "3")
 
 
 
+def prog1 = ["+", 1, 2]
+def list10 = new ExprC[2]
+list10[0] = new numC(1)
+list10[1] = new numC(2)
+parsed1 = parser(prog1)
+(checkEqual(18, interp(parsed1, topEnv), "3"))
 
+def prog2 = "\"start\""
+def parsed2 = parser(prog2)
+checkEqual(19, interp(parsed2, topEnv), "start")
 
+def prog3 = ["read-str"]
+def parsed3 = parser(prog3)
+println("Enter a string:")
+checkEqual(20, (interp(parsed3, topEnv) instanceof strV), "true")
 
