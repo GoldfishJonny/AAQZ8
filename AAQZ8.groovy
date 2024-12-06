@@ -388,7 +388,7 @@ def parser(Sexp) {
     throw new Exception("Invalid array format: " + arr);
 }
 
-def topInterp(Sexp) {
+def topInterp(Sexp, topEnv) {
     parse = parser(Sexp)
     return interp(parse, topEnv)
 }
@@ -484,23 +484,19 @@ def prog1 = ["+", 1, 2]
 def list10 = new ExprC[2]
 list10[0] = new numC(1)
 list10[1] = new numC(2)
-parsed1 = parser(prog1)
-(checkEqual(18, interp(parsed1, topEnv), "3"))
+(checkEqual(18, topInterp(prog1, topEnv), "3"))
 
 def prog2 = "\"start\""
-def parsed2 = parser(prog2)
-checkEqual(19, interp(parsed2, topEnv), "start")
+
+checkEqual(19, topInterp(prog2, topEnv), "start")
 
 def prog3 = ["read-str"]
-def parsed3 = parser(prog3)
 println("Enter a string:")
-checkEqual(20, (interp(parsed3, topEnv) instanceof strV), "true")
+checkEqual(20, (topInterp(prog3, topEnv) instanceof strV), "true")
 
 def prog4 = ["bind", ["x", "=", 1], ["y", "=", 2], ["+", "x", "y"]]
-def parsed4 = parser(prog4)
-checkEqual(21, interp(parsed4, topEnv), "3")
+checkEqual(21, topInterp(prog4, topEnv), "3")
 
 def prog5 = ["bind", ["x", "=", 1], ["y", "=", 2], ["bind", ["z", "=", 3], ["+", ["+", "x", "y"], "z"]]]
-def parsed5 = parser(prog5)
-checkEqual(22, interp(parsed5, topEnv), "6")
+checkEqual(22, topInterp(prog5, topEnv), "6")
 
