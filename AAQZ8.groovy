@@ -25,6 +25,9 @@ class strC extends ExprC {
     strC(String str) {
         this.str = str;
     }
+    String toString() {
+        return str;
+    }
 }
 
 class ifC extends ExprC {
@@ -36,6 +39,9 @@ class ifC extends ExprC {
         this.then = then;
         this.els = els;
     }
+    String toString() {
+        return "ifC" + " (" + test.toString() + ")" + " (" + then.toString() + ")" + " (" + els.toString() + ")";
+    }
 }
 
 class lamC extends ExprC {
@@ -44,6 +50,9 @@ class lamC extends ExprC {
     lamC(String[] args, ExprC body) {
         this.args = args;
         this.body = body;
+    }
+    String toString() {
+        return "lamC"  + args.toString() + " (" + body.toString() + ")";
     }
 }
 
@@ -98,12 +107,18 @@ class cloV extends Value {
         this.args = args;
         this.body = body;
     }
+    String toString() {
+        return "cloV" + args.toString() + " (" + body.toString() + ")";
+    }
 }
 
 class primV extends Value {
     String name;
     primV(String name) {
         this.name = name;
+    }
+    String toString() {
+        return name;
     }
 }
 
@@ -114,12 +129,18 @@ class bindC {
         this.id = id;
         this.val = val;
     }
+    String toString() {
+        return id + " = " + val.toString();
+    }
 }
 
 class envC {
     bindC[] binds;
     envC(bindC[] binds) {
         this.binds = binds;
+    }
+    String toString() {
+        return binds.toString();
     }
 }
 
@@ -330,7 +351,7 @@ def parser(Sexp) {
 
     if (Sexp.size() == 1) {
         def args = new ExprC[0];
-        return new appC(parser(Sexp[0]), args); // Single-element list, delegate to parser
+        return new appC(parser(Sexp[0]), args);
     }
 
     if ((Sexp.size() == 4) && (Sexp[0] == "if")) {
@@ -342,6 +363,18 @@ def parser(Sexp) {
             throw new Exception("Lambda arguments should be a list: " + Sexp[0]);
         }
         return new lamC(Sexp[0], parser(Sexp[2]));
+    }
+
+    if ((Sexp.size() >= 3) && (Sexp[0] == "bind")){
+        def body = parser(Sexp[-1])
+        def args = new String[Sexp.size() - 2]
+        def binds = new ExprC[Sexp.size() - 2]
+        for (int i = 1; i < Sexp.size() - 1; i++){
+            args[i - 1] = Sexp[i][0]
+            binds[i - 1] = parser(Sexp[i][2])
+        }
+
+        return new appC(new lamC(args, body), binds)
     }
 
     if (Sexp.size() >= 2) {
@@ -462,4 +495,12 @@ def prog3 = ["read-str"]
 def parsed3 = parser(prog3)
 println("Enter a string:")
 checkEqual(20, (interp(parsed3, topEnv) instanceof strV), "true")
+
+def prog4 = ["bind", ["x", "=", 1], ["y", "=", 2], ["+", "x", "y"]]
+def parsed4 = parser(prog4)
+checkEqual(21, interp(parsed4, topEnv), "3")
+
+def prog5 = ["bind", ["x", "=", 1], ["y", "=", 2], ["bind", ["z", "=", 3], ["+", ["+", "x", "y"], "z"]]]
+def parsed5 = parser(prog5)
+checkEqual(22, interp(parsed5, topEnv), "6")
 
