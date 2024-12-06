@@ -301,90 +301,53 @@ def interp (ast, env) {
 }
 
 // Test Cases
-def ast1 = new numC(5)
-if (interp(ast1, topEnv).toString() == "5") {
-    println("Test 1 Passed")
-} else {
-    println("Test 1 Failed")
+def checkEqual(testno, act, exp){
+    def passed = "Test "+ testno + " : Passed"
+    def failed = "Test "+ testno + " : Failed, Expected: " + exp + ", Actual: " + act
+    def actStr = act.toString();
+    println((actStr == exp)? passed : failed)
 }
 
+def ast1 = new numC(5)
+checkEqual(1, interp(ast1, topEnv),"5")
+
 def ast2 = new strC("hello")
-if (interp(ast2, topEnv).toString() == "hello") {
-    println("Test 2 Passed")
-} else {
-    println("Test 2 Failed")
-}
+checkEqual(2, interp(ast2, topEnv),"hello")
 
 def list1 = new ExprC[2]
 list1[0] = new numC(3)
 list1[1] = new numC(4)
-
 def ast3 = new appC(new idC("+"), list1)
-if (interp(ast3, topEnv).toString() == "7") {
-    println("Test 3 Passed")
-} else {
-    println("Test 3 Failed")
-}
+checkEqual(3, interp(ast3, topEnv),"7")
 
 def ast4 = new appC(new idC("-"), list1)
-if (interp(ast4, topEnv).toString() == "-1") {
-    println("Test 4 Passed")
-} else {
-    println("Test 4 Failed")
-}
+checkEqual(4, interp(ast4, topEnv),"-1")
 
 def ast5 = new appC(new idC("*"), list1)
-if (interp(ast5, topEnv).toString() == "12") {
-    println("Test 5 Passed")
-} else {
-    println("Test 5 Failed")
-}
+checkEqual(5, interp(ast5, topEnv),"12")
 
 def ast6 = new appC(new idC("/"), list1)
-if (interp(ast6, topEnv).toString() == "0") {
-    println("Test 6 Passed")
-} else {
-    println("Test 6 Failed")
-}
+checkEqual(6, interp(ast6, topEnv),"0")
 
 def ast7 = new appC(new idC("<="), list1)
-if (interp(ast7, topEnv).toString() == "true") {
-    println("Test 7 Passed")
-} else {
-    println("Test 7 Failed")
-}
+checkEqual(7, interp(ast7, topEnv),"true")
+
 
 def ast8 = new appC(new idC("equal?"), list1)
-if (interp(ast8, topEnv).toString() == "false") {
-    println("Test 8 Passed")
-} else {
-    println("Test 8 Failed")
-}
+checkEqual(8, interp(ast8, topEnv),"false")
 
 def list2 = new ExprC[1]
 list2[0] = new strC("hi")
 def ast9 = new appC(new idC("println"), list2)
-if (interp(ast9, topEnv).toString() == "true") {
-    println("Test 9 Passed")
-} else {
-    println("Test 9 Failed")
-}
+checkEqual(9, interp(ast9, topEnv),"true")
 
 def ast10 = new appC(new idC("read-num"), new ExprC[0])
 println("Enter a number:")
-if (interp(ast10, topEnv) instanceof numV) {
-    println("Test 10 Passed")
-} else {
-    println("Test 10 Failed")
-}
+checkEqual(10, (interp(ast10, topEnv) instanceof numV), "true") //Instanceof is converted to a string in the checker
 
 def ast11 = new appC(new idC("read-str"), new ExprC[0])
 println("Enter a string:")
-if (interp(ast11, topEnv) instanceof strV) {
-    println("Test 11 Passed")
-} else {
-    println("Test 11 Failed")
-}
+checkEqual(11, (interp(ast11, topEnv) instanceof strV), "true")
 
 def list3 = new ExprC[2]
 def list4 = new ExprC[1]
@@ -395,43 +358,23 @@ list3[0] = (new appC(new idC("println"), list4))
 list3[1] = (new appC(new idC("println"), list5))
 def ast12 = new appC(new idC("seq"), list3)
 println("--------------------")
-if (interp(ast12, topEnv).toString() == "true") {
-    println("--------------------")
-    println("Test 12 Passed")
-} else {
-    println("Test 12 Failed")
-}
+checkEqual(12, interp(ast12, topEnv), "true")
+println("--------------------")
 
 def list6 = new ExprC[2]
 list6[0] = new strC("hello ")
 list6[1] = new strC("world")
 def ast13 = new appC(new idC("++"), list6)
-if (interp(ast13, topEnv).toString() == "hello world") {
-    println("Test 13 Passed")
-} else {
-    println("Test 13 Failed")
-}
+checkEqual(13, interp(ast13, topEnv), "hello world")
 
 def ast14 = new idC("true")
-if (interp(ast14, topEnv).toString() == "true") {
-    println("Test 14 Passed")
-} else {
-    println("Test 14 Failed")
-}
+checkEqual(14, interp(ast14, topEnv), "true")
 
 def ast15 = new idC("false")
-if (interp(ast15, topEnv).toString() == "false") {
-    println("Test 15 Passed")
-} else {
-    println("Test 15 Failed")
-}
+checkEqual(15, interp(ast15, topEnv), "false")
 
 def ast16 = new ifC(new idC("true"), new numC(1), new numC(2))
-if (interp(ast16, topEnv).toString() == "1") {
-    println("Test 16 Passed")
-} else {
-    println("Test 16 Failed")
-}
+checkEqual(16, interp(ast16, topEnv), "1")
 
 def list7 = new String[1]
 list7[0] = "x"
@@ -441,9 +384,10 @@ list8[1] = new numC(2)
 def list9 = new ExprC[1]
 list9[0] = new numC(1)
 def ast17 = new appC(new lamC(list7, new appC(new idC("+"), list8)), list9)
-if (interp(ast17, topEnv).toString() == "3") {
-    println("Test 17 Passed")
-} else {
-    println("Test 17 Failed")
-}
+checkEqual(17, interp(ast17, topEnv), "3")
+
+
+
+
+
 
