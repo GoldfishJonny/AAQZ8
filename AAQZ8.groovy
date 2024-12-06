@@ -394,7 +394,9 @@ list5[0] = new strC("world")
 list3[0] = (new appC(new idC("println"), list4))
 list3[1] = (new appC(new idC("println"), list5))
 def ast12 = new appC(new idC("seq"), list3)
+println("--------------------")
 if (interp(ast12, topEnv).toString() == "true") {
+    println("--------------------")
     println("Test 12 Passed")
 } else {
     println("Test 12 Failed")
@@ -408,5 +410,40 @@ if (interp(ast13, topEnv).toString() == "hello world") {
     println("Test 13 Passed")
 } else {
     println("Test 13 Failed")
+}
+
+def ast14 = new idC("true")
+if (interp(ast14, topEnv).toString() == "true") {
+    println("Test 14 Passed")
+} else {
+    println("Test 14 Failed")
+}
+
+def ast15 = new idC("false")
+if (interp(ast15, topEnv).toString() == "false") {
+    println("Test 15 Passed")
+} else {
+    println("Test 15 Failed")
+}
+
+def ast16 = new ifC(new idC("true"), new numC(1), new numC(2))
+if (interp(ast16, topEnv).toString() == "1") {
+    println("Test 16 Passed")
+} else {
+    println("Test 16 Failed")
+}
+
+def list7 = new String[1]
+list7[0] = "x"
+def list8 = new ExprC[2]
+list8[0] = new idC("x")
+list8[1] = new numC(2)
+def list9 = new ExprC[1]
+list9[0] = new numC(1)
+def ast17 = new appC(new lamC(list7, new appC(new idC("+"), list8)), list9)
+if (interp(ast17, topEnv).toString() == "3") {
+    println("Test 17 Passed")
+} else {
+    println("Test 17 Failed")
 }
 
